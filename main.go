@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -22,7 +23,24 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	w.Write([]byte("Hello from vimtricks"))
+	trick, err := app.tricks.Get()
+	if err != nil {
+		app.errorLog.Print(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	ts, err := template.ParseFiles("./ui/html/pages/home.tmpl")
+	if err != nil {
+		app.errorLog.Print(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
+
+	err = ts.Execute(w, trick)
+	if err != nil {
+		app.errorLog.Print(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
 }
 
 func (app *application) trickCreate(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +84,10 @@ func main() {
 		tricks:   &models.TrickModel{DB: db},
 	}
 
+	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux := http.NewServeMux()
+
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 	mux.HandleFunc("/", app.home)
 	mux.HandleFunc("/create", app.trickCreate)
 
