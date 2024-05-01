@@ -23,20 +23,29 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	trick, err := app.tricks.Get()
+	files := []string{
+		"./ui/html/pages/error.tmpl",
+		"./ui/html/pages/home.tmpl",
+	}
+	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		app.errorLog.Print(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "Internal Server error", 500)
 		return
 	}
 
-	ts, err := template.ParseFiles("./ui/html/pages/home.tmpl")
+	trick, err := app.tricks.Get()
 	if err != nil {
 		app.errorLog.Print(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		err = ts.ExecuteTemplate(w, "error", nil)
+		if err != nil {
+			app.errorLog.Print(err.Error())
+			http.Error(w, "Internal Server Error", 500)
+		}
+		return
 	}
 
-	err = ts.Execute(w, trick)
+	err = ts.ExecuteTemplate(w, "home", trick)
 	if err != nil {
 		app.errorLog.Print(err.Error())
 		http.Error(w, "Internal Server Error", 500)

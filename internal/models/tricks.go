@@ -47,13 +47,16 @@ func (m *TrickModel) Get() (*Trick, error) {
 			stmt = `SELECT id, title, content, lastused FROM tricks ORDER BY lastused ASC LIMIT 1;`
 			row = m.DB.QueryRow(stmt)
 			err := row.Scan(&t.ID, &t.Content, &t.Title, &t.LastUsed)
+			if err != nil {
+				return nil, err
+			}
 			stmt = `UPDATE tricks SET lastused = UTC_TIMESTAMP() WHERE id = ?`
 			_, err = m.DB.Exec(stmt, t.ID)
 			if err != nil {
-				return t, err
+				return nil, err
 			}
 
-			return t, err
+			return t, nil
 		} else {
 			return nil, err
 		}
