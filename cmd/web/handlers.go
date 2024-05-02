@@ -29,8 +29,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		err = ts.ExecuteTemplate(w, "error", nil)
 		if err != nil {
 			app.errorLog.Print(err.Error())
-			http.Error(w, "Internal Server Error", 500)
 		}
+		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 

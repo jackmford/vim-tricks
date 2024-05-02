@@ -55,8 +55,6 @@ func (m *TrickModel) Get() (*Trick, error) {
 			if err != nil {
 				return nil, err
 			}
-
-			return t, nil
 		} else {
 			return nil, err
 		}

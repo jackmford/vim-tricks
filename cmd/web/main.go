@@ -46,8 +46,14 @@ func main() {
 	mux.HandleFunc("/", app.home)
 	mux.HandleFunc("/create", app.trickCreate)
 
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+
 	infoLog.Print("Starting server on :4000")
-	err = http.ListenAndServe(*addr, mux)
+	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
 
