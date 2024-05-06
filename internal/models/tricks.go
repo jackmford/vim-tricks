@@ -7,7 +7,6 @@ import (
 )
 
 type Trick struct {
-	ID       int
 	Title    string
 	Content  string
 	LastUsed time.Time
@@ -36,22 +35,22 @@ func (m *TrickModel) Insert(title string, content string) (int, error) {
 func (m *TrickModel) Get() (*Trick, error) {
 	//stmt := `SELECT id, title, content, lastused FROM tricks
 	//WHERE lastused < UTC_TIMESTAMP()`
-	stmt := `SELECT id, title, content, lastused FROM tricks WHERE DATE(lastused) = CURDATE();`
+	stmt := `SELECT title, content, lastused FROM tricks WHERE DATE(lastused) = CURDATE();`
 
 	row := m.DB.QueryRow(stmt)
 	t := &Trick{}
 
-	err := row.Scan(&t.ID, &t.Content, &t.Title, &t.LastUsed)
+	err := row.Scan(&t.Content, &t.Title, &t.LastUsed)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			stmt = `SELECT id, title, content, lastused FROM tricks ORDER BY lastused ASC LIMIT 1;`
+			stmt = `SELECT title, content, lastused FROM tricks ORDER BY lastused ASC LIMIT 1;`
 			row = m.DB.QueryRow(stmt)
-			err := row.Scan(&t.ID, &t.Content, &t.Title, &t.LastUsed)
+			err := row.Scan(&t.Content, &t.Title, &t.LastUsed)
 			if err != nil {
 				return nil, err
 			}
-			stmt = `UPDATE tricks SET lastused = UTC_TIMESTAMP() WHERE id = ?`
-			_, err = m.DB.Exec(stmt, t.ID)
+			stmt = `UPDATE tricks SET lastused = UTC_TIMESTAMP() WHERE title = ?`
+			_, err = m.DB.Exec(stmt, t.Title)
 			if err != nil {
 				return nil, err
 			}
