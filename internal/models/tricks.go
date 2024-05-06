@@ -40,12 +40,12 @@ func (m *TrickModel) Get() (*Trick, error) {
 	row := m.DB.QueryRow(stmt)
 	t := &Trick{}
 
-	err := row.Scan(&t.Content, &t.Title, &t.LastUsed)
+	err := row.Scan(&t.Title, &t.Content, &t.LastUsed)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			stmt = `SELECT title, content, lastused FROM tricks ORDER BY lastused ASC LIMIT 1;`
 			row = m.DB.QueryRow(stmt)
-			err := row.Scan(&t.Content, &t.Title, &t.LastUsed)
+			err := row.Scan(&t.Title, &t.Content, &t.LastUsed)
 			if err != nil {
 				return nil, err
 			}
